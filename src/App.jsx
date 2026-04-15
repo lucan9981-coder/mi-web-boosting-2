@@ -1,3 +1,10 @@
+<div style={{ textAlign: "center" }}>
+  <img
+    src="/fastboost.png"
+    alt="Fast Boost"
+    style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }}
+  />
+</div>
 import { useState } from "react";
 
 export default function App() {

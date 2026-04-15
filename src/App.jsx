@@ -1,10 +1,3 @@
-<div style={{ textAlign: "center" }}>
-  <img
-    src="/fastboost.png"
-    alt="Fast Boost"
-    style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }}
-  />
-</div>
 import { useState } from "react";
 
 export default function App() {
@@ -54,101 +47,155 @@ export default function App() {
     info = `Camuflajes ${camoType}`;
   }
 
+  const buttonStyle = (active) => ({
+    margin: 6,
+    padding: "12px 18px",
+    borderRadius: 8,
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "bold",
+    background: active
+      ? "linear-gradient(45deg, #00ffcc, #00ccff)"
+      : "#1f1f1f",
+    color: active ? "black" : "white",
+    boxShadow: active
+      ? "0 0 10px #00ffee"
+      : "0 0 5px rgba(0,0,0,0.5)",
+    transition: "0.2s"
+  });
+
   return (
-    <div style={{ background: "#0f0f0f", color: "white", minHeight: "100vh", padding: 30, fontFamily: "Arial" }}>
-      
-      <h1>🔥 BOOSTING SERVICES</h1>
-      <p>Selecciona servicio, rango o farmeo</p>
+    <div
+      style={{
+        backgroundImage: "url('/fastboost.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+        minHeight: "100vh",
+        fontFamily: "Arial"
+      }}
+    >
+      {/* overlay oscuro */}
+      <div
+        style={{
+          background: "rgba(0,0,0,0.75)",
+          minHeight: "100vh",
+          padding: 30,
+          color: "white"
+        }}
+      >
+        <h1 style={{ textShadow: "0 0 10px cyan" }}>
+          🔥 FAST BOOST SERVICES
+        </h1>
+        <p style={{ opacity: 0.8 }}>
+          Selecciona servicio, rango o farmeo
+        </p>
 
-      {/* SERVICIOS */}
-      <h2>📦 Servicios</h2>
+        {/* SERVICIOS */}
+        <h2>📦 Servicios</h2>
 
-      <button onClick={() => { setService("rebirth"); setRank(""); setCamoType(""); }}>
-        Rankeds Rebirth
-      </button>
+        <button style={buttonStyle(service === "rebirth")}
+          onClick={() => { setService("rebirth"); setRank(""); setCamoType(""); }}>
+          Rankeds Rebirth
+        </button>
 
-      <button onClick={() => { setService("multijugador"); setRank(""); setCamoType(""); }} style={{ marginLeft: 10 }}>
-        Rankeds Multijugador
-      </button>
+        <button style={buttonStyle(service === "multijugador")}
+          onClick={() => { setService("multijugador"); setRank(""); setCamoType(""); }}>
+          Rankeds Multi
+        </button>
 
-      <button onClick={() => { setService("camos"); setRank(""); }} style={{ marginLeft: 10 }}>
-        Farmeo de Camuflajes
-      </button>
+        <button style={buttonStyle(service === "camos")}
+          onClick={() => { setService("camos"); setRank(""); }}>
+          Camuflajes
+        </button>
 
-      {/* RANKEDS */}
-      {(service === "rebirth" || service === "multijugador") && (
-        <>
-          <h2 style={{ marginTop: 20 }}>🎯 Elige rango</h2>
+        {/* RANGOS */}
+        {(service === "rebirth" || service === "multijugador") && (
+          <>
+            <h2 style={{ marginTop: 25 }}>🎯 Elige rango</h2>
 
-          {["oro", "plata", "platino", "diamante", "carmesi", "iridiscente"].map((r) => (
+            {["oro", "plata", "platino", "diamante", "carmesi", "iridiscente"].map((r) => (
+              <button
+                key={r}
+                style={buttonStyle(rank === r)}
+                onClick={() => setRank(r)}
+              >
+                {r}
+              </button>
+            ))}
+          </>
+        )}
+
+        {/* CAMOS */}
+        {service === "camos" && (
+          <>
+            <h2 style={{ marginTop: 25 }}>🎯 Elige modo</h2>
+
+            {Object.keys(camoServices).map((type) => (
+              <button
+                key={type}
+                style={buttonStyle(camoType === type)}
+                onClick={() => setCamoType(type)}
+              >
+                {type}
+              </button>
+            ))}
+
+            {camoType && (
+              <p style={{ marginTop: 15, color: "#00ffcc" }}>
+                💰 {camoServices[camoType].price}€ | ⏱ {camoServices[camoType].days} días
+              </p>
+            )}
+          </>
+        )}
+
+        {/* PRECIO */}
+        {price > 0 && (
+          <div style={{
+            marginTop: 30,
+            padding: 20,
+            background: "#111",
+            borderRadius: 10,
+            boxShadow: "0 0 15px rgba(0,255,255,0.2)"
+          }}>
+            <h2 style={{ color: "#00ffcc" }}>💰 {price}€</h2>
+            <p>{info}</p>
+
             <button
-              key={r}
-              onClick={() => setRank(r)}
+              onClick={() => setOrder(true)}
               style={{
-                margin: 5,
-                padding: 10,
-                background: rank === r ? "green" : "gray",
-                color: "white"
+                marginTop: 10,
+                padding: 12,
+                borderRadius: 8,
+                border: "none",
+                background: "linear-gradient(45deg, cyan, blue)",
+                color: "black",
+                fontWeight: "bold",
+                cursor: "pointer",
+                boxShadow: "0 0 10px cyan"
               }}
             >
-              {r}
+              🚀 Hacer pedido
             </button>
-          ))}
-        </>
-      )}
+          </div>
+        )}
 
-      {/* CAMUFLAJES */}
-      {service === "camos" && (
-        <>
-          <h2 style={{ marginTop: 20 }}>🎯 Elige materia</h2>
-
-          {Object.keys(camoServices).map((type) => (
-            <button
-              key={type}
-              onClick={() => setCamoType(type)}
-              style={{
-                margin: 5,
-                padding: 10,
-                background: camoType === type ? "green" : "gray",
-                color: "white"
-              }}
-            >
-              {type}
-            </button>
-          ))}
-
-          {camoType && (
-            <p style={{ marginTop: 10 }}>
-              💰 Precio: {camoServices[camoType].price}€ | ⏱ {camoServices[camoType].days} días
-            </p>
-          )}
-        </>
-      )}
-
-      {/* PRECIO FINAL */}
-      {price > 0 && (
-        <div style={{ marginTop: 30 }}>
-          <h2>💰 Precio: {price}€</h2>
-          <p>📦 Servicio: {info}</p>
-
-          <button
-            onClick={() => setOrder(true)}
-            style={{ padding: 10, background: "cyan", color: "black", marginTop: 10 }}
-          >
-            Hacer pedido
-          </button>
-        </div>
-      )}
-
-      {/* PEDIDO */}
-      {order && (
-        <div style={{ marginTop: 30 }}>
-          <h2>✅ Pedido creado</h2>
-          <p>{info}</p>
-          <p>Total: {price}€</p>
-          <p>Te contactaremos por Discord</p>
-        </div>
-      )}
+        {/* PEDIDO */}
+        {order && (
+          <div style={{
+            marginTop: 30,
+            padding: 20,
+            background: "#0f0f0f",
+            borderRadius: 10,
+            boxShadow: "0 0 15px rgba(0,255,0,0.3)"
+          }}>
+            <h2 style={{ color: "#00ff88" }}>✅ Pedido creado</h2>
+            <p>{info}</p>
+            <p>Total: {price}€</p>
+            <p>Te contactaremos por Discord</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

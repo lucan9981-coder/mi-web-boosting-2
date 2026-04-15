@@ -4,12 +4,6 @@ export default function App() {
   const [service, setService] = useState("");
   const [rank, setRank] = useState("");
   const [camoType, setCamoType] = useState("");
-  const [orderSent, setOrderSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const [customerName, setCustomerName] = useState("");
-  const [discordUser, setDiscordUser] = useState("");
-  const [notes, setNotes] = useState("");
 
   const rankPrices = {
     rebirth: {
@@ -69,62 +63,6 @@ export default function App() {
     transition: "0.2s"
   });
 
-  const inputStyle = {
-    width: "100%",
-    maxWidth: 450,
-    padding: 12,
-    marginTop: 10,
-    borderRadius: 8,
-    border: "1px solid #333",
-    background: "#161616",
-    color: "white",
-    outline: "none"
-  };
-
-  const submitOrder = async () => {
-    if (!info || price <= 0) {
-      alert("Selecciona un servicio antes de hacer el pedido.");
-      return;
-    }
-
-    if (!customerName.trim() || !discordUser.trim()) {
-      alert("Completa tu nombre y tu Discord.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setOrderSent(false);
-
-      const res = await fetch("http://localhost:3001/api/order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          customerName,
-          discordUser,
-          notes,
-          service: info,
-          price
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Error al enviar el pedido");
-      }
-
-      setOrderSent(true);
-      setNotes("");
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div
       style={{
@@ -148,7 +86,7 @@ export default function App() {
           🔥 FAST BOOST SERVICES
         </h1>
         <p style={{ opacity: 0.8 }}>
-          Selecciona servicio y envía tu pedido
+          Selecciona servicio y haz tu pedido por Discord
         </p>
 
         <h2>📦 Servicios</h2>
@@ -159,7 +97,6 @@ export default function App() {
             setService("rebirth");
             setRank("");
             setCamoType("");
-            setOrderSent(false);
           }}
         >
           Rankeds Rebirth
@@ -171,7 +108,6 @@ export default function App() {
             setService("multijugador");
             setRank("");
             setCamoType("");
-            setOrderSent(false);
           }}
         >
           Rankeds Multi
@@ -183,7 +119,6 @@ export default function App() {
             setService("camos");
             setRank("");
             setCamoType("");
-            setOrderSent(false);
           }}
         >
           Camuflajes
@@ -197,10 +132,7 @@ export default function App() {
               <button
                 key={r}
                 style={buttonStyle(rank === r)}
-                onClick={() => {
-                  setRank(r);
-                  setOrderSent(false);
-                }}
+                onClick={() => setRank(r)}
               >
                 {r}
               </button>
@@ -216,10 +148,7 @@ export default function App() {
               <button
                 key={type}
                 style={buttonStyle(camoType === type)}
-                onClick={() => {
-                  setCamoType(type);
-                  setOrderSent(false);
-                }}
+                onClick={() => setCamoType(type)}
               >
                 {type}
               </button>
@@ -247,67 +176,32 @@ export default function App() {
             <h2 style={{ color: "#00ffcc" }}>💰 {price}€</h2>
             <p>Servicio: {info}</p>
 
-            <input
-              type="text"
-              placeholder="Tu nombre"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              style={inputStyle}
-            />
+            <p style={{ marginTop: 15, color: "#ccc" }}>
+              Entra a nuestro Discord y envíanos este pedido:
+              <br />
+              <strong>{info} - {price}€</strong>
+            </p>
 
-            <input
-              type="text"
-              placeholder="Tu Discord (ej: usuario#1234 o @usuario)"
-              value={discordUser}
-              onChange={(e) => setDiscordUser(e.target.value)}
-              style={inputStyle}
-            />
-
-            <textarea
-              placeholder="Notas extra"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              style={{ ...inputStyle, minHeight: 100, resize: "vertical" }}
-            />
-
-            <button
-              onClick={submitOrder}
-              disabled={loading}
+            <a
+              href="https://discord.gg/2jvp73eGjs"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
+                display: "inline-block",
                 marginTop: 15,
                 padding: 14,
                 width: "100%",
+                textAlign: "center",
                 borderRadius: 10,
-                border: "none",
-                background: loading
-                  ? "#555"
-                  : "linear-gradient(45deg, cyan, blue)",
-                color: "black",
+                background: "linear-gradient(45deg, #5865F2, #7289DA)",
+                color: "white",
                 fontWeight: "bold",
-                cursor: loading ? "not-allowed" : "pointer",
-                boxShadow: "0 0 10px cyan"
+                textDecoration: "none",
+                boxShadow: "0 0 10px rgba(88,101,242,0.7)"
               }}
             >
-              {loading ? "Enviando pedido..." : "🚀 Hacer pedido"}
-            </button>
-          </div>
-        )}
-
-        {orderSent && (
-          <div
-            style={{
-              marginTop: 30,
-              padding: 20,
-              background: "#0f0f0f",
-              borderRadius: 10,
-              boxShadow: "0 0 15px rgba(0,255,0,0.3)",
-              maxWidth: 520
-            }}
-          >
-            <h2 style={{ color: "#00ff88" }}>✅ Pedido enviado</h2>
-            <p>{info}</p>
-            <p>Total: {price}€</p>
-            <p>Te contactaremos por Discord.</p>
+              💬 Hacer pedido por Discord
+            </a>
           </div>
         )}
       </div>

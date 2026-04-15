@@ -4,7 +4,12 @@ export default function App() {
   const [service, setService] = useState("");
   const [rank, setRank] = useState("");
   const [camoType, setCamoType] = useState("");
-  const [order, setOrder] = useState(false);
+  const [orderSent, setOrderSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [customerName, setCustomerName] = useState("");
+  const [discordUser, setDiscordUser] = useState("");
+  const [notes, setNotes] = useState("");
 
   const rankPrices = {
     rebirth: {
@@ -64,6 +69,62 @@ export default function App() {
     transition: "0.2s"
   });
 
+  const inputStyle = {
+    width: "100%",
+    maxWidth: 450,
+    padding: 12,
+    marginTop: 10,
+    borderRadius: 8,
+    border: "1px solid #333",
+    background: "#161616",
+    color: "white",
+    outline: "none"
+  };
+
+  const submitOrder = async () => {
+    if (!info || price <= 0) {
+      alert("Selecciona un servicio antes de hacer el pedido.");
+      return;
+    }
+
+    if (!customerName.trim() || !discordUser.trim()) {
+      alert("Completa tu nombre y tu Discord.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setOrderSent(false);
+
+      const res = await fetch("http://localhost:3001/api/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          customerName,
+          discordUser,
+          notes,
+          service: info,
+          price
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Error al enviar el pedido");
+      }
+
+      setOrderSent(true);
+      setNotes("");
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div
       style={{
@@ -75,7 +136,6 @@ export default function App() {
         fontFamily: "Arial"
       }}
     >
-      {/* overlay oscuro */}
       <div
         style={{
           background: "rgba(0,0,0,0.75)",
@@ -88,28 +148,47 @@ export default function App() {
           🔥 FAST BOOST SERVICES
         </h1>
         <p style={{ opacity: 0.8 }}>
-          Selecciona servicio, rango o farmeo
+          Selecciona servicio y envía tu pedido
         </p>
 
-        {/* SERVICIOS */}
         <h2>📦 Servicios</h2>
 
-        <button style={buttonStyle(service === "rebirth")}
-          onClick={() => { setService("rebirth"); setRank(""); setCamoType(""); }}>
+        <button
+          style={buttonStyle(service === "rebirth")}
+          onClick={() => {
+            setService("rebirth");
+            setRank("");
+            setCamoType("");
+            setOrderSent(false);
+          }}
+        >
           Rankeds Rebirth
         </button>
 
-        <button style={buttonStyle(service === "multijugador")}
-          onClick={() => { setService("multijugador"); setRank(""); setCamoType(""); }}>
+        <button
+          style={buttonStyle(service === "multijugador")}
+          onClick={() => {
+            setService("multijugador");
+            setRank("");
+            setCamoType("");
+            setOrderSent(false);
+          }}
+        >
           Rankeds Multi
         </button>
 
-        <button style={buttonStyle(service === "camos")}
-          onClick={() => { setService("camos"); setRank(""); }}>
+        <button
+          style={buttonStyle(service === "camos")}
+          onClick={() => {
+            setService("camos");
+            setRank("");
+            setCamoType("");
+            setOrderSent(false);
+          }}
+        >
           Camuflajes
         </button>
 
-        {/* RANGOS */}
         {(service === "rebirth" || service === "multijugador") && (
           <>
             <h2 style={{ marginTop: 25 }}>🎯 Elige rango</h2>
@@ -118,7 +197,10 @@ export default function App() {
               <button
                 key={r}
                 style={buttonStyle(rank === r)}
-                onClick={() => setRank(r)}
+                onClick={() => {
+                  setRank(r);
+                  setOrderSent(false);
+                }}
               >
                 {r}
               </button>
@@ -126,7 +208,6 @@ export default function App() {
           </>
         )}
 
-        {/* CAMOS */}
         {service === "camos" && (
           <>
             <h2 style={{ marginTop: 25 }}>🎯 Elige modo</h2>
@@ -135,7 +216,10 @@ export default function App() {
               <button
                 key={type}
                 style={buttonStyle(camoType === type)}
-                onClick={() => setCamoType(type)}
+                onClick={() => {
+                  setCamoType(type);
+                  setOrderSent(false);
+                }}
               >
                 {type}
               </button>
@@ -149,50 +233,81 @@ export default function App() {
           </>
         )}
 
-        {/* PRECIO */}
         {price > 0 && (
-          <div style={{
-            marginTop: 30,
-            padding: 20,
-            background: "#111",
-            borderRadius: 10,
-            boxShadow: "0 0 15px rgba(0,255,255,0.2)"
-          }}>
+          <div
+            style={{
+              marginTop: 30,
+              padding: 20,
+              background: "#111",
+              borderRadius: 10,
+              boxShadow: "0 0 15px rgba(0,255,255,0.2)",
+              maxWidth: 520
+            }}
+          >
             <h2 style={{ color: "#00ffcc" }}>💰 {price}€</h2>
-            <p>{info}</p>
+            <p>Servicio: {info}</p>
+
+            <input
+              type="text"
+              placeholder="Tu nombre"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              style={inputStyle}
+            />
+
+            <input
+              type="text"
+              placeholder="Tu Discord (ej: usuario#1234 o @usuario)"
+              value={discordUser}
+              onChange={(e) => setDiscordUser(e.target.value)}
+              style={inputStyle}
+            />
+
+            <textarea
+              placeholder="Notas extra"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              style={{ ...inputStyle, minHeight: 100, resize: "vertical" }}
+            />
 
             <button
-              onClick={() => setOrder(true)}
+              onClick={submitOrder}
+              disabled={loading}
               style={{
-                marginTop: 10,
-                padding: 12,
-                borderRadius: 8,
+                marginTop: 15,
+                padding: 14,
+                width: "100%",
+                borderRadius: 10,
                 border: "none",
-                background: "linear-gradient(45deg, cyan, blue)",
+                background: loading
+                  ? "#555"
+                  : "linear-gradient(45deg, cyan, blue)",
                 color: "black",
                 fontWeight: "bold",
-                cursor: "pointer",
+                cursor: loading ? "not-allowed" : "pointer",
                 boxShadow: "0 0 10px cyan"
               }}
             >
-              🚀 Hacer pedido
+              {loading ? "Enviando pedido..." : "🚀 Hacer pedido"}
             </button>
           </div>
         )}
 
-        {/* PEDIDO */}
-        {order && (
-          <div style={{
-            marginTop: 30,
-            padding: 20,
-            background: "#0f0f0f",
-            borderRadius: 10,
-            boxShadow: "0 0 15px rgba(0,255,0,0.3)"
-          }}>
-            <h2 style={{ color: "#00ff88" }}>✅ Pedido creado</h2>
+        {orderSent && (
+          <div
+            style={{
+              marginTop: 30,
+              padding: 20,
+              background: "#0f0f0f",
+              borderRadius: 10,
+              boxShadow: "0 0 15px rgba(0,255,0,0.3)",
+              maxWidth: 520
+            }}
+          >
+            <h2 style={{ color: "#00ff88" }}>✅ Pedido enviado</h2>
             <p>{info}</p>
             <p>Total: {price}€</p>
-            <p>Te contactaremos por Discord</p>
+            <p>Te contactaremos por Discord.</p>
           </div>
         )}
       </div>
